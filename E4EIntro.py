@@ -13,9 +13,12 @@ def stratified_random_sample(csv_path):
     # reads csv file
     data = pd.read_csv(csv_path, low_memory=False)
 
-    # filter out data that is less than one minute and/or has an na StartDateTime
+    # filter out data that is less than one minute, has an na StartDateTime, and/or is from a failed AudioMoth
     data = data[data["Duration"] > 60]
-    data = data.dropna(axis="rows", subset=["StartDateTime"])
+    data = data.dropna(axis='rows', subset=["StartDateTime"])
+
+    audiomothsDropped = ["AM-21", "AM-19", "AM-8", "AM-28"]
+    data = data[~data["AudioMothCode"].isin(audiomothsDropped)]
 
     # create data frame
     stratified_random_sample = pd.DataFrame(columns=data.columns)
@@ -62,6 +65,9 @@ def stratified_random_sample(csv_path):
     # convert DataFrame to csv file
     stratified_random_sample.to_csv(
         csv_path[:-4] + "_stratified_random_sample.csv", index=False)
+
+    # check to see if right number of elements is in the csv file
+    # print(len(stratified_random_sample), len(stratified_random_sample.AudioMothCode.unique()))
 
     # returns True if completed
     return True
