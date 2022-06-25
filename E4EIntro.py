@@ -13,9 +13,9 @@ def stratified_random_sample(csv_path):
     # reads csv file
     data = pd.read_csv(csv_path, low_memory=False)
 
-    # filter out data that is less than one minute, has an na StartDateTime, and/or is from a failed AudioMoth
-    data = data[data["Duration"] > 60]
-    data = data.dropna(axis='rows', subset=["StartDateTime"])
+    # filter out data that is less than one minute, has NA values in necessary columns, and/or is from a failed AudioMoth
+    data = data[data["Duration"] >= 60]
+    data = data.dropna(axis='rows', subset=["Comment", "Duration"])
 
     audiomothsDropped = ["AM-21", "AM-19", "AM-8", "AM-28"]
     data = data[~data["AudioMothCode"].isin(audiomothsDropped)]
@@ -38,14 +38,14 @@ def stratified_random_sample(csv_path):
         # iterate through all hours
         for hour in range(24):
 
-            # create string to search for in StartDateTime column
+            # create string to search for in Comment column
             if (hour < 10):
-                time_string = " 0" + str(hour)
+                time_string = "Recorded at 0" + str(hour)
             else:
-                time_string = " " + str(hour)
+                time_string = "Recorded at " + str(hour)
 
             # filter hour-specific data
-            hourly_data = specific_data[specific_data["StartDateTime"].str.contains(
+            hourly_data = specific_data[specific_data["Comment"].str.contains(
                 time_string)]
 
             # only continue if there exists a data entry for this hour
